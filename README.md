@@ -32,7 +32,39 @@ pnpm i
 
 ### Setting up .env
 
-- Create a `.env` file at the root of your project.
+- Create a file called `.env` at the root of your project.
+
+  <details>
+  <summary>Here are the required environment variables</summary>
+
+  - `DISCORD_BOT_TOKEN` - (Required) Token provided by Discord when creating the bot.
+  - `BOT_ID` - (Required) ID of the GFC Discord bot.
+  - `GFC_INTRO_SURVEY_LINK` - (Required) - URL of the GFC intro survey link.
+
+  - `ADMIN_1_DISCORD_ID` - (Required) ID of an admin of the GFC discord server.
+  - `ADMIN_2_DISCORD_ID` - (Required) - ID of another admin of the GFC discord server.
+
+  - `DISCORD_SERVER_ID` - (Required) - ID of the server where this bot is invited.
+  - `ADMIN_ROLE_ID` - (Required) - ID of the admin role in the server.
+  - `GENERAL_CHAT_CHANNEL_ID` - (Required) - ID of the general chat channel in the GFC discord server.
+  - `CHECKINS_VOICE_CHANNEL_ID` - (Required) - ID of the check-ins voice channel in the GFC discord server.
+  - `FIRST_RESPONDERS_ROLE_ID` - (Required) - ID of the role `@First-Responders`.
+  - `VIRTUAL_OFFICE_VOICE_CHANNEL_ID` - (Required) - ID of the virtual office voice channel in the GFC discord server.
+
+  - `NOTION_KEY` - (Required) Secret key of the GFC Notion integration.
+  - `NOTION_SUPPORT_TICKETS_DATABASE_ID` - (Required) ID of the GFC Notion database which will store all support tickets.
+  - `NOTION_SUPPORT_TICKETS_DATABASE_STATUS_ID` - (Required) - ID of the status property in the notion support tickets database.
+  - `NOTION_SUPPORT_TICKETS_DATABASE_LINK` - (Required) - URL of the notion support tickets database.
+  - `NOTION_RETRO_DATABASE_ID` - (Required) - ID of the retrospective notion database.
+  - `NOTION_BACKLOG_DATABASE_ID` - (Required) - ID of the backlog notion database.
+  - `NOTION_BACKLOG_DATABASE_LINK` - (Required) - URL of the notion backlog database.
+
+  - `SENTRY_DSN` - (Optional) - DSN of your nodejs project on [sentry.io](https://sentry.io/).
+
+  - `OPENAI_API_KEY` - (Optional) - API Key for accessing OpenAI functionality.
+
+  </details>
+
 - Populate fields in the `.env` file.
 
   - Sign up on [Keybase](https://keybase.io/)!
@@ -42,11 +74,6 @@ pnpm i
   - Download or copy contents into your local `.env` file.
 
 - Get access to the [Digital Junkyard](https://discord.gg/4cJFTdGMBY) development server on Discord.
-
-- Create a new file `newrelic.js` in project root.
-
-  - Look for the `newrelic.js` file in the same location as `.env` in Keybase.
-  - Copy those contents over to the local `newrelic.js` file.
 
 ### Run the bot
 
@@ -86,12 +113,24 @@ When committing code to the repo, please follow the commit message guidelines/pa
    * To trigger, type `/info` in the discord server.
    */
 
+  import * as Sentry from '@sentry/node';
   import { CommandInteraction, Client } from 'discord.js';
   import { version } from '../../package.json';
   import { COMMAND_INFO } from '../utils';
   import { SlashCommand } from '../Command';
 
+  require('@sentry/tracing');
+
   async function executeRun(interaction: CommandInteraction) {
+    Sentry.setUser({
+      id: interaction.user.id,
+      username: interaction.user.username,
+    });
+    const transaction = Sentry.startTransaction({
+      op: 'transaction',
+      name: `/${COMMAND_INFO.COMMAND_NAME}`,
+    });
+
     const content = `\`Your username\`: ${interaction.user.username}
   \`Your ID\`: ${interaction.user.id}
   \`Server name\`: ${interaction.guild?.name}
@@ -99,6 +138,9 @@ When committing code to the repo, please follow the commit message guidelines/pa
   \`${interaction.client.user.username} version\`: ${version}`;
 
     await interaction.followUp({ ephemeral: true, content });
+
+    transaction.finish();
+    Sentry.setUser(null);
   }
 
   const Info: SlashCommand = {

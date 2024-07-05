@@ -33,8 +33,10 @@
     "dotenv": "latest",
     "langchain": "0.2.7",
     "newrelic": "latest",
+    "nostr-tools": "^2.7.0",
     "pouchdb-node": "latest",
-    "undici": "latest"
+    "undici": "latest",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@commitlint/cli": "latest",

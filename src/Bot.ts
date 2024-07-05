@@ -8,6 +8,7 @@ import guildMemberAdd from './listeners/guildMemberAdd';
 import interactionCreate from './listeners/interactionCreate';
 import messageCreate from './listeners/messageCreate';
 import ready from './listeners/ready';
+import nostrListener from './listeners/migsNostrListener';
 import { DailyReminderAtEmpiric } from './utils';
 
 /**
@@ -46,6 +47,8 @@ function start() {
   guildMemberAdd(client);
   interactionCreate(client);
   messageCreate(client);
+  nostrListener(client);
+  
   ready(client);
 
   // Call login on client for authenticating the bot with Discord.
