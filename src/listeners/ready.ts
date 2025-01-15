@@ -4,7 +4,7 @@
 
 import { ActivityType, Client } from 'discord.js';
 import { AUTOBOT, DailyReminderAtEmpiric, GITFITBOT } from '../utils';
-import Commands from '../Commands';
+import { registerCommands } from '../Commands';
 
 export default (client: Client): void => {
   client.on('ready', async () => {
@@ -25,7 +25,7 @@ export default (client: Client): void => {
     }
 
     // Register slash commands with the client.
-    await client.application.commands.set(Commands);
+    registerCommands(client);
 
     console.log(`${client.user.username} is online`);
   });
